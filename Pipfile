@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 click = "8.0.3"
 autopep8 = "*"
+pipe = "1.6.0"
 
 [dev-packages]
 pre-commit = "2.15.0"

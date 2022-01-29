@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import random
+import re
+from collections import Counter
 
 import click
+import pipe
 
 
 def get_data():
@@ -13,17 +16,57 @@ def output(data, limit, rand):
     data = list(data)
     if rand:
         random.shuffle(data)
-    data = data[:limit]
+    data = list(data | pipe.take(limit))
     data.sort()
 
     return "\n".join(data)
 
 
+def check_filter_input(token):
+    if not re.match(r"^[a-zåäö]+$", token):
+        click.secho(
+            f"Voit rajoittaa hakua vain suomen aakkosiin, kaikki pienellä. Annoit {token}",
+            fg="red",
+        )
+        raise click.Abort()
+
+
+def get_char_count(token):
+    return Counter(token)
+
+
+def get_includes(data, include):
+    req = get_char_count(include)
+    return list(data | pipe.where(lambda l: get_char_count(l) & req == req))
+
+
+def get_excludes(data, exclude):
+    excl = set(exclude)
+    return list(data | pipe.where(lambda l: set(l) & excl == set()))
+
+
 @click.command()
-@click.option("-l", "--limit", type=click.IntRange(min=1), default=10)
+@click.option(
+    "-i",
+    "--include",
+    help="Must include following letters. Can contain multiple of same letter",
+    type=str,
+)
+@click.option("-e", "--exclude", help="Must exclude following letters", type=str)
+@click.option(
+    "-l", "--limit", help="Limit result output", type=click.IntRange(min=1), default=10
+)
 @click.option("-r", "--rand", help="Randomise values", is_flag=True)
-def search(limit, rand):
+def search(include, exclude, limit, rand):
     data = get_data()
+
+    if include:
+        check_filter_input(include)
+        data = get_includes(data, include)
+
+    if exclude:
+        check_filter_input(exclude)
+        data = get_excludes(data, exclude)
 
     click.echo(output(data, limit, rand))
 
