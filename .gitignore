@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+
+# Python: Pipenv
+Pipfile.lock
+
+# Editor: vim
+*.sw[op]
+
+# Editor: Visual Studio Code
+/.vscode/
+
+# OSX
+.DS_Store
