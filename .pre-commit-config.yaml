@@ -22,3 +22,15 @@ repos:
         entry: pipenv run flake8
         types: [python]
 
+      - id: rstcheck
+        name: rstcheck
+        stages: [commit]
+        language: python
+        types: [rst]
+        entry: pipenv run rstcheck
+      
+      - id: update-cmdlist
+        name: update-cmdlist
+        stages: [commit]
+        language: system
+        entry: ./bin/update-commandlist.sh && git add docs/COMMANDS.rst
